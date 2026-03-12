@@ -48,7 +48,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - POSTGRES_CONTAINER=medusa-postgres
-      - CLEANUP_AFTER=20m
+      - CLEANUP_AFTER=3d
     env_file:
       - ./.env.production
     entrypoint: |
@@ -67,7 +67,7 @@ services:
           printf \"export %s='%s'\\n\" \"\$$name\" \"\$$esc\" >> /root/env.sh
         done &&
         chmod 0644 /root/env.sh &&
-        echo '*/5 * * * * . /root/env.sh && /usr/local/bin/backup.sh >> /proc/1/fd/1 2>&1' > /etc/crontabs/root &&
-        echo '*/10 * * * * . /root/env.sh && /usr/local/bin/cleanup.sh >> /proc/1/fd/1 2>&1' >> /etc/crontabs/root &&
+        echo '0 2 * * * . /root/env.sh && /usr/local/bin/backup.sh >> /proc/1/fd/1 2>&1' > /etc/crontabs/root &&
+        echo '0 3 * * * . /root/env.sh && /usr/local/bin/cleanup.sh >> /proc/1/fd/1 2>&1' >> /etc/crontabs/root &&
         crond -f -l 2
       "
