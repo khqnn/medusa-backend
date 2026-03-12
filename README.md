@@ -78,7 +78,7 @@ Key variables:
 
 | Variable                         | Description                                                       |
 |----------------------------------|-------------------------------------------------------------------|
-| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | PostgreSQL credentials and database name.          |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` / `POSTGRES_HOST` / `POSTGRES_PORT` | PostgreSQL credentials and database name.          |
 | `DATABASE_URL`                   | Full PostgreSQL connection string used by Medusa.                 |
 | `REDIS_URL`                      | Redis connection string.                                           |
 | `JWT_SECRET` / `COOKIE_SECRET`   | Secrets for authentication and sessions.                           |

@@ -2,15 +2,17 @@
 set -e
 
 echo "Waiting for database to be ready..."
-while ! nc -z postgres 5432; do
+while ! nc -z "$POSTGRES_HOST" "$POSTGRES_PORT"; do
   sleep 1
 done
 echo "Database is ready."
+
 
 # Debug: test direct connection with node
 echo "Testing direct database connection..."
 node -e "
 const { Client } = require('pg');
+console.log('DATABASE URL', process.env.DATABASE_URL)
 const client = new Client({ connectionString: process.env.DATABASE_URL });
 client.connect()
   .then(() => {

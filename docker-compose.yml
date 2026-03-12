@@ -71,10 +71,3 @@ services:
         echo '*/10 * * * * . /root/env.sh && /usr/local/bin/cleanup.sh >> /proc/1/fd/1 2>&1' >> /etc/crontabs/root &&
         crond -f -l 2
       "
-
-    # docker exec -it medusa-backend /bin/sh
-    # yarn medusa user -e admin@test.com -p password
-    # awslocal s3 mb s3://medusa-db-backups
-    # awslocal s3 ls s3://medusa-db-backups/postgres-backups/
-    # docker exec -it medusa-backup /bin/sh
-    # docker exec -it medusa-backup ./usr/local/bin/restore.sh
