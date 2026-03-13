@@ -21,9 +21,10 @@ services:
       - "6379:6379"
 
   backend:
-    build:
-      context: ./medusa-store-backend
-      dockerfile: Dockerfile
+    image: khaqan/medusa-backend
+    # build:
+    #   context: ./medusa-store-backend
+    #   dockerfile: Dockerfile
     container_name: medusa-backend
     restart: always
     depends_on:
