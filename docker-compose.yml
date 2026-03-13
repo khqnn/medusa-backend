@@ -54,21 +54,26 @@ services:
       - ./.env.production
     entrypoint: |
       sh -c "
-        apk add --no-cache postgresql-client aws-cli bash docker-cli &&
-        # Copy scripts to a writable location and make them executable
-        cp /backup.sh /usr/local/bin/backup.sh &&
-        cp /restore.sh /usr/local/bin/restore.sh &&
-        cp /cleanup.sh /usr/local/bin/cleanup.sh &&
-        chmod +x /usr/local/bin/backup.sh /usr/local/bin/restore.sh /usr/local/bin/cleanup.sh &&
-        # Export all environment variables to a file for cron
-        echo '#!/bin/sh' > /root/env.sh &&
-        printenv | while IFS='=' read -r name value; do
-          [ -z \"\$$name\" ] && continue
-          esc=\$$(printf \"%s\" \"\$$value\" | sed \"s/'/'\\\\\\\\''/g\")
-          printf \"export %s='%s'\\n\" \"\$$name\" \"\$$esc\" >> /root/env.sh
-        done &&
-        chmod 0644 /root/env.sh &&
-        echo '0 2 * * * . /root/env.sh && /usr/local/bin/backup.sh >> /proc/1/fd/1 2>&1' > /etc/crontabs/root &&
-        echo '0 3 * * * . /root/env.sh && /usr/local/bin/cleanup.sh >> /proc/1/fd/1 2>&1' >> /etc/crontabs/root &&
+        apk add --no-cache postgresql-client aws-cli bash &&
+        chmod +x /backup.sh /restore.sh /cleanup.sh &&
+        echo '0 2 * * * /backup.sh >> /var/log/backup.log 2>&1' > /etc/crontabs/root &&
+        echo '0 3 * * * /cleanup.sh >> /var/log/cleanup.log 2>&1' >> /etc/crontabs/root &&
         crond -f -l 2
+        # apk add --no-cache postgresql-client aws-cli bash docker-cli &&
+        # # Copy scripts to a writable location and make them executable
+        # cp /backup.sh /usr/local/bin/backup.sh &&
+        # cp /restore.sh /usr/local/bin/restore.sh &&
+        # cp /cleanup.sh /usr/local/bin/cleanup.sh &&
+        # chmod +x /usr/local/bin/backup.sh /usr/local/bin/restore.sh /usr/local/bin/cleanup.sh &&
+        # # Export all environment variables to a file for cron
+        # echo '#!/bin/sh' > /root/env.sh &&
+        # printenv | while IFS='=' read -r name value; do
+        #   [ -z \"\$$name\" ] && continue
+        #   esc=\$$(printf \"%s\" \"\$$value\" | sed \"s/'/'\\\\\\\\''/g\")
+        #   printf \"export %s='%s'\\n\" \"\$$name\" \"\$$esc\" >> /root/env.sh
+        # done &&
+        # chmod 0644 /root/env.sh &&
+        # echo '0 2 * * * . /root/env.sh && /usr/local/bin/backup.sh >> /proc/1/fd/1 2>&1' > /etc/crontabs/root &&
+        # echo '0 3 * * * . /root/env.sh && /usr/local/bin/cleanup.sh >> /proc/1/fd/1 2>&1' >> /etc/crontabs/root &&
+        # crond -f -l 2
       "
