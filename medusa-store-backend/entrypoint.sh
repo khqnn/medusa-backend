@@ -12,7 +12,6 @@ echo "Database is ready."
 echo "Testing direct database connection..."
 node -e "
 const { Client } = require('pg');
-console.log('DATABASE URL', process.env.DATABASE_URL)
 const client = new Client({ connectionString: process.env.DATABASE_URL });
 client.connect()
   .then(() => {

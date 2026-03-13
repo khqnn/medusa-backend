@@ -22,5 +22,5 @@ RUN chown -R medusa:medusa /app
 USER medusa
 
 EXPOSE 9000
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["sh", "/entrypoint.sh"]
 CMD ["yarn", "start"]
