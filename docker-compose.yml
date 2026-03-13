@@ -50,6 +50,7 @@ services:
     environment:
       - POSTGRES_CONTAINER=medusa-postgres
       - CLEANUP_AFTER=3d
+      - DOCKER_API_VERSION=1.41
     env_file:
       - ./.env.production
     entrypoint: |
