@@ -1,7 +1,6 @@
 version: "3.9"
 
 services:
-
   postgres:
     image: postgres:14-alpine
     container_name: medusa-postgres
@@ -21,10 +20,9 @@ services:
       - "6379:6379"
 
   backend:
-    image: khaqan/medusa-backend
-    # build:
-    #   context: ./medusa-store-backend
-    #   dockerfile: Dockerfile
+    build:
+      context: ./medusa-store-backend
+      dockerfile: Dockerfile
     container_name: medusa-backend
     restart: always
     depends_on:
@@ -34,34 +32,26 @@ services:
       - ./.env.production
     ports:
       - "9000:9000"
+    volumes:
+      - ./static_data:/app/static        # Shared volume for local file storage
 
-# ---------- Backup service ----------
   backup:
-    image: alpine:latest
+    build: ./backup                     # Build from the backup directory
     container_name: medusa-backup
     restart: unless-stopped
     depends_on:
       - postgres
+      - backend
     volumes:
-      - ./backup-postgres-to-s3.sh:/backup.sh:ro
-      - ./restore-postgres-from-s3.sh:/restore.sh:ro
-      - ./cleanup-postgres-from-s3.sh:/cleanup.sh:ro
+      - ./static_data:/static:ro          # Read-only access to static files for backup
+      - ./backup_data:/backups            # Persistent volume for local backups
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - POSTGRES_CONTAINER=medusa-postgres
-      - CLEANUP_AFTER=3d
+      - BACKEND_CONTAINER=medusa-backend
+      - LOCAL_BACKUP_DIR=/backups
+      - STATIC_BACKUP_SOURCE=/static
+      - STATIC_BACKUP_TARGET=/app/static   # ensures restore uses correct path
       - DOCKER_API_VERSION=1.41
     env_file:
       - ./.env.production
-    entrypoint: |
-      sh -c "
-        apk add --no-cache postgresql-client aws-cli bash docker-cli &&
-        # Copy scripts to a writable location and make them executable
-        cp /backup.sh /usr/local/bin/backup.sh &&
-        cp /restore.sh /usr/local/bin/restore.sh &&
-        cp /cleanup.sh /usr/local/bin/cleanup.sh &&
-        chmod +x /usr/local/bin/backup.sh /usr/local/bin/restore.sh /usr/local/bin/cleanup.sh &&
-        echo '0 2 * * * .  /usr/local/bin/backup.sh >> /proc/1/fd/1 2>&1' > /etc/crontabs/root &&
-        echo '0 3 * * * .  /usr/local/bin/cleanup.sh >> /proc/1/fd/1 2>&1' >> /etc/crontabs/root &&
-        crond -f -l 2
-      "
